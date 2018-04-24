@@ -29,6 +29,11 @@
 #ifndef BRAIDS_DRIVERS_ENCODER_H_
 #define BRAIDS_DRIVERS_ENCODER_H_
 
+// Define for Bourns encoders which run in reverse
+// Thanks to Tim Churches for adding this
+// https://github.com/timchurches/Mutated-Mutables/commit/57affb63d03437407b1b80f5042ba4af6b560288#diff-9b2bb09adcb4ceafb9619c91a3e0efab)
+#define BACKWARDS_ENCODER
+
 #include <stm32f10x_conf.h>
 #include "stmlib/stmlib.h"
 
@@ -63,10 +68,18 @@ class Encoder {
     uint8_t a = quadrature_decoding_state_[0];
     uint8_t b = quadrature_decoding_state_[1];
     if ((a & 0x03) == 0x02 && (b & 0x03) == 0x00) {
+#ifdef BACKWARDS_ENCODER
+	  increment = 1;
+#else
       increment = -1;
+#endif
     } else {
       if ((b & 0x03) == 0x02 && (a & 0x03) == 0x00) {
-        increment = 1;
+#ifdef BACKWARDS_ENCODER
+          increment = -1;
+#else
+          increment = 1;
+#endif
       }
     }
     return increment;
